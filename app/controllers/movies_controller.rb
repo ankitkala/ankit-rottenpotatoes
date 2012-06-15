@@ -6,22 +6,50 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  def index
-    @movies = Movie.all
-    if (params[:sort] == "title"||params[:sort] == "release_date") then @ordering=params[:sort];sort; end
+ def index
+    sort = params[:sort] || session[:sort]
+    case sort
+    when 'title'
+      ordering,@title_header = {:order => :title}, 'hilite'
+    when 'release_date'
+      ordering,@date_header = {:order => :release_date}, 'hilite'
+    end
+#    @all_ratings = Movie.all_ratings
+    @all_ratings = ['G','PG','PG-13','R','NC-17']
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
 
-    if (params[:sort] == "title") then @title_header='hilite' end
-    if (params[:sort] == "release_date") then @date_header='hilite' end
+    if params[:sort] != session[:sort]
+      session[:sort] = sort
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
+
+    if params[:ratings] != session[:ratings] and @selected_ratings != {}
+      session[:sort] = sort
+      session[:ratings] = @selected_ratings
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
+    @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
   end
 
+#  def index
+#    @all_ratings = ['G','PG','PG-13','R','NC-17']
+#    @movies = Movie.all
+#    @selected_ratings = params[:ratings] || {}
+#    #    if (params[:ratings] == nil) then @selected_ratings=@all_ratings end
+#    if (params[:sort] == "title") then @title_header='hilite' 
+#    elsif (params[:sort] == "release_date") then @date_header='hilite' end
+#    
+#     @movies = Movie.find_all_by_rating(@selected_ratings.keys, @ordering)
+#  end
 
-  def sort
-	if @ordering == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
-		
-	elsif @ordering == "release_date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
-		
-	end
-  end
+
+#  def sort
+#	if @ordering == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
+#		
+#	elsif @ordering == "release_date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
+#		
+#	end
+#  end
 
 
 
