@@ -6,37 +6,28 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
+  def index
+    sort = params[:sort] || session[:sort]
+    case sort
+    when 'title'
+      ordering,@title_header = {:order => :title}, 'hilite'
+    when 'release_date'
+      ordering,@date_header = {:order => :release_date}, 'hilite'
+    end
+    @all_ratings = Movie.all_ratings
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
 
+    if params[:sort] != session[:sort]
+      session[:sort] = sort
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
 
-
-  def index	
-    if @movies == nil then @movies = Movie.all end	
-    @all_ratings = ['G','PG','PG-13','R','NC-17']
-
-#    if(param[:ratings.keys]!=nil)
-#	{
-#		@all_ratings.each{ |rate| 
-#					filter[rate]=0;
-#					};
-#		param[:ratings.keys].each{ |elt| filter[elt]=1; }
-#		@movies=@movies.where( ('rating'='G' and filter[G]='1') or ('rating'='PG' and filter[PG]='1') or ('rating'='PG-13' and filter[PG-13]='1') or ('rating'='R' and filter[R]='1') or ('rating'='NC-17' and filter[NC-17]='1'));
-		
-#	}
-    #,-{ :class => (params[:sort_by] == "title" ? "hilite" : "th")}
-    
-    if (params[:sort_by] == "title"||params[:sort_by] == "date") then 		sort end
-  end
-
-
-
-
-
-  def sort
-	if params[:sort_by] == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
-		
-	elsif params[:sort_by] == "date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
-		
-	end
+    if params[:ratings] != session[:ratings] and @selected_ratings != {}
+      session[:sort] = sort
+      session[:ratings] = @selected_ratings
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
+    @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
   end
 
   def new
