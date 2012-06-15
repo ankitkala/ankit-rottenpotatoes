@@ -6,38 +6,25 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
+  def index
+    @movies = Movie.all
+    if (params[:sort] == "title"||params[:sort] == "release_date") then @ordering=params[:sort];sort; end
 
-
-
-  def index	
-    if @movies == nil then @movies = Movie.all end	
-    @all_ratings = ['G','PG','PG-13','R','NC-17']
-
-    if(param[:ratings.keys]!=nil)
-	{
-		@all_ratings.each{ |rate| 
-					filter[rate]=0;
-					};
-		param[:ratings.keys].each{ |elt| filter[elt]=1; }
-		@movies=@movies.where( ('rating'='G' and filter[G]='1') or ('rating'='PG' and filter[PG]='1') or ('rating'='PG-13' and filter[PG-13]='1') or ('rating'='R' and filter[R]='1') or ('rating'='NC-17' and filter[NC-17]='1'));
-		
-	}
-    #,-{ :class => (params[:sort_by] == "title" ? "hilite" : "th")}
-    
-    if (params[:sort_by] == "title"||params[:sort_by] == "date") then 		sort end
+    if (params[:sort] == "title") then @title_header='hilite' end
+    if (params[:sort] == "release_date") then @date_header='hilite' end
   end
-
-
-
 
 
   def sort
-	if params[:sort_by] == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
+	if @ordering == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
 		
-	elsif params[:sort_by] == "date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
+	elsif @ordering == "release_date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
 		
 	end
   end
+
+
+
 
   def new
     # default: render 'new' template

@@ -8,7 +8,23 @@ class MoviesController < ApplicationController
 
   def index
     @movies = Movie.all
+    if (params[:sort] == "title"||params[:sort] == "release_date") then @ordering=params[:sort];sort; end
+
+    if (params[:sort] == "title") then @title_header='hilite' end
+    if (params[:sort] == "release_date") then @date_header='hilite' end
   end
+
+
+  def sort
+	if @ordering == "title" then @movies.sort!{ |a,b| a.title <=> b.title }
+		
+	elsif @ordering == "release_date" then @movies.sort!{ |a,b| a.release_date <=> b.release_date }
+		
+	end
+  end
+
+
+
 
   def new
     # default: render 'new' template
